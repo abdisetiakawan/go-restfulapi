@@ -10,6 +10,10 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
+func NewCategoryController(categoryService service.CategoryService) CategoryController {
+	return &CategoryControllerImpl{CategoryService: categoryService}
+}
+
 type CategoryControllerImpl struct {
 	CategoryService service.CategoryService
 }
@@ -31,7 +35,7 @@ func (controller *CategoryControllerImpl) Update(writer http.ResponseWriter, req
 	helper.ReadFromRequestBody(request, &categoryUpdateRequest)
 
 	categoryId := params.ByName("id")
-	id , err := strconv.Atoi(categoryId)
+	id, err := strconv.Atoi(categoryId)
 	helper.PanicIfError(err)
 	categoryUpdateRequest.Id = id
 	categoryResponse := controller.CategoryService.Update(request.Context(), categoryUpdateRequest)
