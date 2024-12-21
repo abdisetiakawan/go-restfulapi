@@ -10,13 +10,17 @@ import (
 
 type CategoryRepositoryImpl struct{}
 
+func NewCategoryRepository() CategoryRepository {
+	return &CategoryRepositoryImpl{}
+}
+
 func (repository *CategoryRepositoryImpl) Save(ctx context.Context, tx *sql.Tx, category model.Category) model.Category {
 	SQL := "insert into category(name) values (?)"
 	result, err := tx.ExecContext(ctx, SQL, category.Name)
 	helper.PanicIfError(err)
 	id, err := result.LastInsertId()
 	helper.PanicIfError(err)
-	category.ID = uint(id)
+	category.ID = int(id)
 	return category
 }
 
@@ -37,6 +41,7 @@ func (repository *CategoryRepositoryImpl) FindById(ctx context.Context, tx *sql.
 	SQL := "select id, name from category where id = ?"
 	rows, err := tx.QueryContext(ctx, SQL, id)
 	helper.PanicIfError(err)
+	defer rows.Close()
 	category := model.Category{}
 	if rows.Next() {
 		err = rows.Scan(&category.ID, &category.Name)
@@ -51,6 +56,7 @@ func (repository *CategoryRepositoryImpl) FindAll(ctx context.Context, tx *sql.T
 	SQL := "select id, name from category"
 	rows, err := tx.QueryContext(ctx, SQL)
 	helper.PanicIfError(err)
+	defer rows.Close()
 	categories := []model.Category{}
 	for rows.Next() {
 		category := model.Category{}
