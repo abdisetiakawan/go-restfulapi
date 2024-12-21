@@ -13,14 +13,19 @@ import (
 
 type CategoryServiceImpl struct {
 	CategoryRepository repository.CategoryRepository
-	DB 				   *sql.DB
-	Validate 		   *validator.Validate
+	DB                 *sql.DB
+	Validate           *validator.Validate
 }
 
-func (service *CategoryServiceImpl) Save(ctx context.Context, request web.CategoryRequest) web.CategoryResponse {
+
+func NewCategoryService(categoryRepository repository.CategoryRepository, db *sql.DB) *CategoryServiceImpl {
+	return &CategoryServiceImpl{CategoryRepository: categoryRepository, DB: db, Validate: validator.New()}
+}
+
+func (service *CategoryServiceImpl) Create(ctx context.Context, request web.CategoryRequest) web.CategoryResponse {
 	err := service.Validate.Struct(request)
 	helper.PanicIfError(err)
-	
+
 	tx, err := service.DB.Begin()
 	helper.PanicIfError(err)
 	defer helper.CommitOrRollback(tx)
@@ -37,12 +42,11 @@ func (service *CategoryServiceImpl) Update(ctx context.Context, request web.Cate
 	tx, err := service.DB.Begin()
 	helper.PanicIfError(err)
 	defer helper.CommitOrRollback(tx)
-
 	category, err := service.CategoryRepository.FindById(ctx, tx, uint(request.Id))
 	helper.PanicIfError(err)
-
+	
 	category.Name = request.Name
-
+	
 	category = service.CategoryRepository.Update(ctx, tx, category)
 	return helper.ToCategoryResponse(category)
 }
