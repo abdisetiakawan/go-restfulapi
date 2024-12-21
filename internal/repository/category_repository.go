@@ -11,6 +11,6 @@ type CategoryRepository interface {
     Save(ctx context.Context, tx *sql.Tx, category model.Category) model.Category
     Update(ctx context.Context, tx *sql.Tx, category model.Category) model.Category
     Delete(ctx context.Context, tx *sql.Tx, category model.Category)
-    FindById(ctx context.Context, tx *sql.Tx, id uint) model.Category
+    FindById(ctx context.Context, tx *sql.Tx, id uint) (model.Category, error)
     FindAll(ctx context.Context, tx *sql.Tx) []model.Category
 }
